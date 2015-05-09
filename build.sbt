@@ -16,13 +16,15 @@ resolvers ++= Seq(
 	"Java.net Maven2 Repository" at "http://download.java.net/maven/2/",
 	"Sonatype Nexus Releases" at "https://oss.sonatype.org/content/repositories/releases",
 	"Scala Snapshots" at "http://scala-tools.org/repo-snapshots/",
-    "twitter-repo" at "http://maven.twttr.com"
+    "twitter-repo" at "http://maven.twttr.com",
+    Resolver.sonatypeRepo("snapshots")
 )
 
 // Project dependencies
 libraryDependencies ++= Seq(
     "com.twitter" %% "finagle-core" % "6.24.0",
     "com.twitter" %% "finagle-http" % "6.24.0",
+    "com.github.finagle" %% "finch-core" % "0.7.0-SNAPSHOT" changing(),
     "com.netaporter" %% "scala-uri" % "0.4.4",
     "org.apache.httpcomponents" % "httpclient" % "4.1.1",
     "org.apache.commons" % "commons-lang3" % "3.2.1",
