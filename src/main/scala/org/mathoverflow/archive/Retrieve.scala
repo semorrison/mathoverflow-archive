@@ -7,11 +7,11 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
 
 object Retrieve {
-  def apply(post: Int): String = {
+  def apply(post: Int): (String, String) = {
     val url = s"http://api.stackexchange.com/2.2/questions/$post?order=desc&sort=activity&site=mathoverflow.net&filter=!3yXvh9)gd0IKKXn31"
     val response = new ContentEncodingHttpClient().execute(new HttpGet(url))
     val entity = response.getEntity();
     val status = response.getStatusLine().getStatusCode()
-    EntityUtils.toString(entity)
+    (url, EntityUtils.toString(entity))
   }
 }

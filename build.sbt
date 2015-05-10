@@ -24,7 +24,7 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
     "com.twitter" %% "finagle-core" % "6.24.0",
     "com.twitter" %% "finagle-http" % "6.24.0",
-    "com.github.finagle" %% "finch-core" % "0.7.0-SNAPSHOT" changing(),
+    "com.github.finagle" %% "finch-core" % "0.6.0",
     "com.netaporter" %% "scala-uri" % "0.4.4",
     "org.apache.httpcomponents" % "httpclient" % "4.1.1",
     "org.apache.commons" % "commons-lang3" % "3.2.1",
@@ -48,3 +48,5 @@ libraryDependencies ++= Seq(
 publishTo := Some(Resolver.sftp("tqft.net", "tqft.net", "tqft.net/releases") as ("scottmorrison", new java.io.File("/Users/scott/.ssh/id_rsa")))
 
 EclipseKeys.eclipseOutput := Some(".target")
+
+EclipseKeys.withSource := true

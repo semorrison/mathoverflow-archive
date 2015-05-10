@@ -16,6 +16,8 @@ import Argonaut._
 import java.util.Calendar
 import java.util.TimeZone
 import java.text.SimpleDateFormat
+import java.io.StringWriter
+import java.io.PrintWriter
 
 object Web {
   def main(args: Array[String]) {
@@ -36,50 +38,66 @@ class ResolverService extends Service[HttpRequest, HttpResponse] {
   def apply(req: HttpRequest): Future[HttpResponse] = {
     val response = Response()
 
-    val parameters = new QueryStringDecoder(req.getUri()).getParameters
-    import scala.collection.JavaConverters._
-    val callback = Option(parameters.get("callback")).map(_.asScala.headOption).flatten
+    try {
+      val parameters = new QueryStringDecoder(req.getUri()).getParameters
+      val path = new QueryStringDecoder(req.getUri()).getPath().split("/").toSeq.tail
 
-    val path = new QueryStringDecoder(req.getUri()).getPath().split("/").toSeq.tail
-    val jsonRequested = callback.nonEmpty || path.head == "json"
-    val question = path(1).toInt
-    val timestamp = Time.parse(path.drop(2).mkString("/"))
+      import scala.collection.JavaConverters._
+      val callback = Option(parameters.get("callback")).map(_.asScala.headOption).flatten
 
-    println("received request: " + path.mkString("/"))
-    println("request timestamp: " + timestamp)
+      val jsonRequested = callback.nonEmpty || req.getUri.contains("json") || req.headers.get("Accept").contains("application/json")
+      
+      val question = path(1).toInt
+      val timestamp = Time.parse(path.drop(2).mkString("/"))
 
-    val (resultTimestamp, json) = Lookup(question, timestamp)
-    println("lookup timestamp: " + resultTimestamp)
-    println(json)
+      println("received request: " + path.mkString("/"))
+      println("request timestamp: " + timestamp)
 
-    if (path.size == 4 && resultTimestamp == timestamp) {
-      println("200")
-      response.setStatusCode(200)
+      val (resultTimestamp, json) = Lookup(question, timestamp)
+      println("lookup timestamp: " + resultTimestamp)
+      println(json)
 
-      if (jsonRequested) {
-        callback match {
-          case Some(c) => {
-            response.setContentType("application/javascript")
-            response.contentString = c + "(" + json + ");"
+      if (path.size == 4 && resultTimestamp == timestamp) {
+        println("200")
+        response.setStatusCode(200)
+
+        if (jsonRequested) {
+          callback match {
+            case Some(c) => {
+              response.setContentType("application/javascript")
+              response.contentString = c + "(" + json + ");"
+            }
+            case None => {
+              response.setContentType("application/json")
+              response.contentString = json
+            }
           }
-          case None => {
-            response.setContentType("application/json")
-            response.contentString = json
-          }
+        } else {
+          response.setContentType("text/plain")
+          response.contentString = json
         }
+
       } else {
-        response.setContentType("text/plain")
-        response.contentString = json
+        response.setStatusCode(301)
+        val timestampString = Time.write(resultTimestamp)
+        val url = path.take(2).mkString("/", "/", "/") + timestampString
+        println("redirecting to " + url)
+        response.headers.set("Location", url)
       }
 
-    } else {
-      response.setStatusCode(301)
-      val timestampString = Time.write(resultTimestamp)
-      val url = path.take(2).mkString("/", "/", "/") + timestampString
-      println("redirecting to " + url)
-      response.setHeader("Location", url)
+      Future(response)
+    } catch {
+      case e: Exception => {
+        response.setStatusCode(500)
+        response.setContentType("text/plain")
+        response.contentString = {
+          val sw = new StringWriter
+          e.printStackTrace(new PrintWriter(sw))
+          sw.toString()
+        }
+        Future(response)
+      }
     }
 
-    Future(response)
   }
 }

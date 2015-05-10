@@ -13,13 +13,17 @@ object Lookup {
         if r.post === post;
         if r.timestamp > timestamp
       ) yield r).run.headOption match {
-        case Some((_, post, resultTimestamp, json)) => (resultTimestamp, json)
+        case Some((_, post, resultTimestamp, _, _, formattedJSON)) => (resultTimestamp, formattedJSON)
         case None => {
           println("Retrieving JSON from the SE API")
           val resultTimestamp = Time.now
-          val json = Retrieve(post)
-          Tables.Archive += (0, post, resultTimestamp, json)
-          (resultTimestamp, json)
+          val (requestURL, json) = Retrieve(post)
+          val formattedJSON = {
+            import argonaut._, Argonaut._
+            Parse.parseOption(json).get.spaces2
+          }
+          Tables.Archive += (0, post, resultTimestamp, requestURL, json, formattedJSON)
+          (resultTimestamp, formattedJSON)
         }
       }
     }

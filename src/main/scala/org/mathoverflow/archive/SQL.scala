@@ -9,12 +9,14 @@ object SQL {
   def apply[A](closure: slick.driver.MySQLDriver.backend.Session => A): A = Database.forURL("jdbc:mysql://mysql.tqft.net/mathoverflowarchive?user=mathoverflow&password=ambulapcha", driver = "com.mysql.jdbc.Driver") withSession closure
 }
 
-class archive(tag: Tag) extends Table[(Int, Int, Long, String)](tag, "archive") {
+class archive(tag: Tag) extends Table[(Int, Int, Long, String, String, String)](tag, "archive") {
   def id = column[Int]("id", O.PrimaryKey)
   def post = column[Int]("post")
   def timestamp = column[Long]("timestamp")
-  def json = column[String]("json")
-  def * = (id, post, timestamp, json)
+  def requestURL = column[String]("requestURL")
+  def JSON = column[String]("JSON")
+  def formattedJSON = column[String]("formattedJSON")
+  def * = (id, post, timestamp, requestURL, JSON, formattedJSON)
 }
 
 object Tables {
