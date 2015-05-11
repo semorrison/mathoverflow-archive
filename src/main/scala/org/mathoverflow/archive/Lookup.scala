@@ -11,7 +11,7 @@ object Lookup {
       (for (
         r <- Tables.Archive;
         if r.post === post;
-        if r.timestamp > timestamp
+        if r.timestamp >= timestamp
       ) yield r).run.headOption match {
         case Some((_, post, resultTimestamp, _, _, formattedJSON)) => (resultTimestamp, formattedJSON)
         case None => {

@@ -32,6 +32,7 @@ libraryDependencies ++= Seq(
     "com.google.guava" % "guava" % "16.0.1",
     "com.google.code.findbugs" % "jsr305" % "2.0.2",
     "io.argonaut" %% "argonaut" % "6.0.4",
+    "eu.medsea.mimeutil" % "mime-util" % "2.1.3",
     "mysql" % "mysql-connector-java" % "5.1.24",
     "com.typesafe.slick" %% "slick" % "2.1.0",
     "org.mapdb" % "mapdb" % "0.9.9",

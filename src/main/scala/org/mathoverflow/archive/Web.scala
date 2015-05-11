@@ -14,10 +14,15 @@ import scala.io.Source
 import java.io.StringWriter
 import java.io.PrintWriter
 import java.net.URLConnection
+import eu.medsea.mimeutil.MimeUtil
+import scala.collection.JavaConverters._
 
 object Web {
+  
+  MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector")
+  
   def main(args: Array[String]) {
-    val port = Properties.envOrElse("PORT", "8080").toInt
+    val port = Properties.envOrElse("PORT", "8090").toInt
     println("Starting on port:" + port)
     ServerBuilder()
       .codec(Http())
@@ -48,7 +53,9 @@ class ResolverService extends Service[HttpRequest, HttpResponse] {
         val filename = path.tail.mkString("/", "/", "")
         Option(getClass.getResourceAsStream(filename)).map(is => Source.fromInputStream(is).mkString) match {
           case Some(content) => {
-            response.setContentType(URLConnection.guessContentTypeFromName(filename))
+            val mimetype = MimeUtil.getMimeTypes(path.last).asScala.last.toString
+            println("found content of type:" + mimetype)
+            response.setContentType(mimetype)
             response.setStatusCode(200)
             response.contentString = content
           }
@@ -56,8 +63,7 @@ class ResolverService extends Service[HttpRequest, HttpResponse] {
             response.setStatusCode(404)
           }
         }
-      } else if(path.head == "question"){
-        import scala.collection.JavaConverters._
+      } else if (path.head == "questions") {
         val callback = Option(parameters.get("callback")).map(_.asScala.headOption).flatten
 
         val jsonRequested = callback.nonEmpty || req.getUri.contains("json") || req.headers.get("Accept").contains("application/json")
@@ -69,7 +75,6 @@ class ResolverService extends Service[HttpRequest, HttpResponse] {
 
         val (resultTimestamp, json) = Lookup(question, timestamp)
         println("lookup timestamp: " + resultTimestamp)
-        println(json)
 
         if (path.size == 4 && resultTimestamp == timestamp) {
           println("200")

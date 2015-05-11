@@ -1,0 +1,12 @@
+<div>
+   {{for items}}
+   <p>
+   	This is <a href="https://mathoverflow.net/questions/{{>question_id}}">question {{>question_id}}</a> from <a
+   	href="https://mathoverflow.net/">MathOverflow</a>, as it appeared at <span id="timestamp"></span>.
+   	<script>
+   		var path = window.location.toString().split("/");
+   		$("#timestamp").text(path[6] + " on " + path[5] + " (UTC)");
+   	</script>
+   </p>
+   {{/for}}
+</div>
