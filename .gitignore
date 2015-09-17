@@ -2,9 +2,12 @@
 /target/
 
 .cache
+.cache-main
 .classpath
 .project
 .settings
+
+config
 
 project/project
 project/target

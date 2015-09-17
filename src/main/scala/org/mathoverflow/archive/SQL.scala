@@ -6,7 +6,8 @@ import scala.collection.JavaConverters._
 
 
 object SQL {
-  def apply[A](closure: slick.driver.MySQLDriver.backend.Session => A): A = Database.forURL("jdbc:mysql://mysql.tqft.net/mathoverflowarchive?user=mathoverflow&password=ambulapcha", driver = "com.mysql.jdbc.Driver") withSession closure
+  def password = Source.fromFile("config").getLines.mkString("")
+  def apply[A](closure: slick.driver.MySQLDriver.backend.Session => A): A = Database.forURL(s"jdbc:mysql://mysql.tqft.net/mathoverflowarchive?user=mathoverflow&password=$password", driver = "com.mysql.jdbc.Driver") withSession closure
 }
 
 class archive(tag: Tag) extends Table[(Int, Int, Long, String, String, String)](tag, "archive") {
